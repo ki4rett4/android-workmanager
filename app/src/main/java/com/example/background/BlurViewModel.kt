@@ -52,10 +52,11 @@ class BlurViewModel(application: Application) : AndroidViewModel(application) {
      * Creates the input data bundle which includes the Uri to operate on
      * @return Data which contains the Image Uri as a String
      */
-    private fun createInputDataForUri(): Data {
+    private fun createInputDataForUri(blurLevel: Int): Data {
         val builder = Data.Builder()
         imageUri?.let {
             builder.putString(KEY_IMAGE_URI, imageUri.toString())
+            builder.putInt(KEY_IMAGE_LEVEL, blurLevel)
         }
         return builder.build()
     }
@@ -73,7 +74,7 @@ class BlurViewModel(application: Application) : AndroidViewModel(application) {
                         OneTimeWorkRequest.from(CleanupWorker::class.java)
                 )
 
-        // Add WorkRequests to blur the image the number of times requested
+       /* // Add WorkRequests to blur the image the number of times requested
         for (i in 0 until blurLevel) {
             val blurBuilder = OneTimeWorkRequestBuilder<BlurWorker>()
 
@@ -85,7 +86,12 @@ class BlurViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             continuation = continuation.then(blurBuilder.build())
-        }
+        }*/
+
+
+        val blurBuilder = OneTimeWorkRequestBuilder<BlurWorker>()
+        blurBuilder.setInputData(createInputDataForUri(blurLevel))
+        continuation = continuation.then(blurBuilder.build())
 
         // Create charging constraint
         val constraints = Constraints.Builder()
